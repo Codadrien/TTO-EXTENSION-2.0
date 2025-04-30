@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "TTO-EXTENSION 2.0",
+  "version": "1.0",
+  "description": "Affiche un volet latéral à droite de l’écran sur demande.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_title": "Afficher le volet latéral"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["panel-listener.js"],
+      "css": ["panel.css"]
+    }
+  ],
+  "icons": {
+    "16": "icon/icon16.png",
+    "48": "icon/icon48.png",
+    "128": "icon/icon128.png"
+  }
+}
