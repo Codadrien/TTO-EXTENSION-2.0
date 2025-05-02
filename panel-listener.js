@@ -20,12 +20,31 @@ function togglePanel() {
         const panel = document.createElement('div');
         panel.id = 'custom-side-panel';
         panel.className = 'custom-side-panel';
-        panel.innerHTML = `
-            <div style="text-align:center;">
-                <h2>Volet latéral personnalisé</h2>
-                <p>ça fonctionne</p>
-            </div>
-        `;
+        // On prépare l'URL du fichier panel.html dans l'extension
+        const panelUrl = chrome.runtime.getURL('panel.html');
+        console.log('[DEBUG] URL du panel HTML chargé :', panelUrl);
+
+        // On charge dynamiquement le contenu du panneau depuis panel.html
+        // panel.html est déclaré dans le manifest, donc accessible
+        fetch(panelUrl)
+            .then(response => {
+                console.log('[DEBUG] Réponse fetch:', response);
+                if (!response.ok) {
+                    throw new Error('Erreur HTTP : ' + response.status);
+                }
+                return response.text();
+            })
+            .then(html => {
+                console.log('[DEBUG] HTML récupéré :', html.slice(0, 200)); // Affiche un extrait du HTML
+                panel.innerHTML = html;
+                // Ici, le HTML du panneau est injecté dynamiquement
+                // Avantage : le contenu est séparé et facile à maintenir
+            })
+            .catch(err => {
+                console.error('[DEBUG] Erreur lors du chargement du panneau :', err);
+                panel.innerHTML = '<div style="color:red;text-align:center;">Erreur de chargement du panneau</div>';
+            });
+        // Cette méthode permet de diagnostiquer précisément chaque étape du chargement.
         document.body.appendChild(panel);
         // Forcer le reflow pour que la transition fonctionne même à la création
         void panel.offsetWidth;
