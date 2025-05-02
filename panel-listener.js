@@ -23,7 +23,7 @@ function togglePanel() {
         panel.innerHTML = `
             <div style="text-align:center;">
                 <h2>Volet latéral personnalisé</h2>
-                <p>Ici tu pourras ajouter du contenu plus tard.</p>
+                <p>ça fonctionne</p>
             </div>
         `;
         document.body.appendChild(panel);
