@@ -13,7 +13,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["panel-listener.js"],
+      "js": ["panel-listener.js", "image-collector.js"],
       "css": ["panel.css"]
     }
   ],
@@ -24,7 +24,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["panel.html", "panel.css"],
+      "resources": ["panel.css"],
       "matches": ["<all_urls>"]
     }
   ]

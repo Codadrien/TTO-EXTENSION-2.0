@@ -1,14 +1,28 @@
 // panel-listener.js
-// Ce content script écoute les messages du background et gère le toggle du panneau latéral
-// Il est injecté sur toutes les pages via le manifest
+// Ce script gère l'affichage du panneau latéral et des images
+
+// Variable pour stocker les dernières images reçues
+let lastReceivedImages = [];
+
+// Fonction pour afficher les images dans le panel
+function updateImages(images) {
+    const container = document.querySelector('#custom-side-panel .image-grid');
+    if (!container) return;
+
+    container.innerHTML = ''; // Vide le conteneur
+    images.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = 'Image de la page';
+        container.appendChild(img);
+    });
+}
 
 // Fonction pour afficher ou retirer le panneau
 function togglePanel() {
     const existingPanel = document.getElementById('custom-side-panel');
     if (existingPanel) {
-        // Si le panneau existe, on retire la classe visible pour lancer l'animation de fermeture
         existingPanel.classList.remove('visible');
-        // Attendre la fin de la transition avant de retirer le panneau du DOM
         existingPanel.addEventListener('transitionend', function handler(e) {
             if (e.propertyName === 'transform') {
                 existingPanel.removeEventListener('transitionend', handler);
@@ -16,46 +30,39 @@ function togglePanel() {
             }
         });
     } else {
-        // Sinon, on le crée
         const panel = document.createElement('div');
         panel.id = 'custom-side-panel';
         panel.className = 'custom-side-panel';
-        // On prépare l'URL du fichier panel.html dans l'extension
-        const panelUrl = chrome.runtime.getURL('panel.html');
-        console.log('[DEBUG] URL du panel HTML chargé :', panelUrl);
-
-        // On charge dynamiquement le contenu du panneau depuis panel.html
-        // panel.html est déclaré dans le manifest, donc accessible
-        fetch(panelUrl)
-            .then(response => {
-                console.log('[DEBUG] Réponse fetch:', response);
-                if (!response.ok) {
-                    throw new Error('Erreur HTTP : ' + response.status);
-                }
-                return response.text();
-            })
-            .then(html => {
-                console.log('[DEBUG] HTML récupéré :', html.slice(0, 200)); // Affiche un extrait du HTML
-                panel.innerHTML = html;
-                // Ici, le HTML du panneau est injecté dynamiquement
-                // Avantage : le contenu est séparé et facile à maintenir
-            })
-            .catch(err => {
-                console.error('[DEBUG] Erreur lors du chargement du panneau :', err);
-                panel.innerHTML = '<div style="color:red;text-align:center;">Erreur de chargement du panneau</div>';
-            });
-        // Cette méthode permet de diagnostiquer précisément chaque étape du chargement.
+        
+        // Crée la structure du panel directement
+        panel.innerHTML = `
+            <div class="image-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px;">
+            </div>
+        `;
+        
         document.body.appendChild(panel);
-        // Forcer le reflow pour que la transition fonctionne même à la création
         void panel.offsetWidth;
         panel.classList.add('visible');
+        
+        // Affiche les images si on en a déjà
+        if (lastReceivedImages.length > 0) {
+            updateImages(lastReceivedImages);
+        }
     }
 }
 
-// Écoute les messages envoyés depuis le background
+// Écoute les messages du background
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request && request.type === 'toggle-panel') {
+    console.log('Message reçu:', request);
+
+    if (request.type === 'toggle-panel') {
         togglePanel();
+    } else if (request.type === 'update-images') {
+        lastReceivedImages = request.images;
+        const panel = document.getElementById('custom-side-panel');
+        if (panel) {
+            updateImages(request.images);
+        }
     }
 });
 
