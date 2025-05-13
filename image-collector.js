@@ -1,53 +1,42 @@
 // image-collector.js
-// Script pour récupérer toutes les images de la page
+// Ce script collecte toutes les images visibles de la page et les envoie au background.
+// Il n'a qu'un seul rôle : détecter les images pertinentes et les transmettre.
 
+/**
+ * Collecte les images visibles de la page (taille > 300px, pas en base64)
+ * et envoie la liste au background pour affichage dans le panneau.
+ */
 function collectImages() {
-    console.log('Collecte des images en cours...');
-    
-    // Sélectionne toutes les balises img de la page
+    // Récupère toutes les balises <img> de la page
     const images = document.getElementsByTagName('img');
-    console.log('Nombre d\'images trouvées:', images.length);
-    
-    // Crée un tableau pour stocker les URLs des images
     const imageUrls = [];
-    
-    // Parcourt toutes les images et récupère leurs URLs
     for (const img of images) {
-        // Vérifie si l'image est assez grande (> 300px)
-        if (img.naturalWidth >= 300 || img.naturalHeight >= 300) {
-            const src = img.src;
-            if (src && !src.startsWith('data:')) { // Ignore les images en base64
-                imageUrls.push(src);
-                console.log('Image trouvée (>300px):', src, `${img.naturalWidth}x${img.naturalHeight}`);
-            }
+        // On filtre les images trop petites ou en base64
+        if ((img.naturalWidth >= 300 || img.naturalHeight >= 300) && img.src && !img.src.startsWith('data:')) {
+            imageUrls.push(img.src);
         }
     }
-    
-    console.log('Envoi des URLs au background:', imageUrls);
-    
-    // Envoie les URLs au panel via un message
+    // Envoie la liste au background
     chrome.runtime.sendMessage({
         type: 'update-images',
         images: imageUrls
     }, (response) => {
         if (chrome.runtime.lastError) {
-            console.error('Erreur lors de l\'envoi:', chrome.runtime.lastError);
-        } else {
-            console.log('Message envoyé avec succès');
+            console.error('[image-collector] Erreur lors de l\'envoi:', chrome.runtime.lastError);
         }
     });
 }
 
-// Exécute la collecte au chargement de la page
+// Collecte les images au chargement de la page
 collectImages();
 
-// Observe les changements dans le DOM pour détecter les nouvelles images
+// Observe les changements du DOM pour détecter les nouvelles images dynamiques
 const observer = new MutationObserver(() => {
     collectImages();
 });
-
-// Configure l'observation du DOM
 observer.observe(document.body, {
     childList: true,
     subtree: true
 });
+
+// Ce fichier n'a qu'un seul rôle : collecter et transmettre les images. Rien de plus, rien de moins.

@@ -12,11 +12,17 @@
         document.body.classList.add('is-panel-html');
       }
     </script>
+    <!--
+      Ce fichier HTML sert à la fois :
+      - de template pour l'injection dynamique du panneau dans les pages (panel-listener.js va charger ce fichier et extraire #custom-side-panel)
+      - de preview pour le développement (quand tu ouvres panel.html directement)
+      Modifie ici la structure du panneau, elle sera répercutée partout.
+    -->
     <div id="custom-side-panel" class="custom-side-panel">
       <div id="header" class="header">
-        Extention TTO
+        Extension TTO
       </div>
-      <div id="imageContainer" class="image-grid"></div> <!-- Conteneur pour les images -->
+      <div id="imageContainer" class="image-grid"></div>
     </div>
     <script src="panel-listener.js"></script>
     <script>

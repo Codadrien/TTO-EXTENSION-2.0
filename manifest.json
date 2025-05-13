@@ -27,7 +27,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["panel.css"],
+      "resources": ["panel.css", "panel.html"],
       "matches": ["<all_urls>"]
     }
   ]
