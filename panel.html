@@ -23,16 +23,22 @@
         Extension TTO
       </div>
       <div id="imageContainer" class="image-grid"></div>
+      <!--
+        Template HTML pour une carte image :
+        Ce template ne s'affiche pas directement, il sert de modèle pour créer dynamiquement chaque carte via JS.
+        Avantage : la structure HTML reste claire et réutilisable.
+      -->
+      <template id="image-card-template">
+        <div class="image-card">
+          <img class="image-item" src="" alt="Image">
+          <div class="image-details">
+            <div class="size"></div>
+            <div class="format"></div>
+            <div class="weight"></div>
+          </div>
+        </div>
+      </template>
     </div>
     <script src="panel-listener.js"></script>
-    <script>
-        // Charger les données de test dès le chargement de la page
-        loadTestData().then(testImages => {
-            console.log('Images de test chargées:', testImages); // Affiche les images de test dans la console
-            updateImages(testImages); // Affiche les images de test
-        }).catch(error => {
-            console.error('Erreur lors du chargement des données de test:', error);
-        });
-    </script>
 </body>
 </html>

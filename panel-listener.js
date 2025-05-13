@@ -1,27 +1,92 @@
 // panel-listener.js
-// Script unique pour gérer l'affichage du panneau, que ce soit dans panel.html (mode test) ou sur une page web (mode extension).
-// La logique d'affichage et de mise en page est centralisée ici.
+// Script pour gérer l'affichage du panneau (test ou extension)
 
-// Variable pour stocker les dernières images reçues
 let lastReceivedImages = [];
 
 /**
  * Affiche les images dans le panneau latéral.
- * @param {string[]} images - Liste des URLs d'images à afficher
+ * @param {string[]} images - URLs d'images à afficher
  */
 function updateImages(images) {
     const container = document.getElementById('imageContainer');
-    if (!container) {
-        console.error('Container imageContainer non trouvé!');
-        return;
-    }
     container.innerHTML = '';
+    const template = document.getElementById('image-card-template');
+
     images.forEach(url => {
-        const img = document.createElement('img');
+        // Clone le template et sélectionne les éléments
+        const card = template.content.cloneNode(true);
+        const img = card.querySelector('.image-item');
+        const details = card.querySelector('.image-details');
+        const sizeElement = card.querySelector('.size');
+        const formatElement = card.querySelector('.format');
+        const weightElement = card.querySelector('.weight');
         img.src = url;
-        img.alt = 'Image de la page';
-        container.appendChild(img);
+        img.alt = 'Image';
+
+        // Format (extension du fichier) - Méthode améliorée
+        let format = '';
+        try {
+            // 1. On extrait d'abord le nom de fichier en ignorant les paramètres d'URL
+            const urlWithoutParams = url.split('?')[0];
+            // 2. On extrait le dernier segment du chemin (le nom de fichier)
+            const fileName = urlWithoutParams.split('/').pop();
+            // 3. On récupère l'extension (dernière partie après le point)
+            if (fileName && fileName.includes('.')) {
+                format = fileName.split('.').pop().toLowerCase();
+                // Vérification que c'est bien un format d'image connu
+                const validFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'];
+                if (!validFormats.includes(format)) {
+                    format = format + ' (?)'; // Format non standard
+                }
+            } else {
+                format = 'inconnu';
+            }
+        } catch (e) {
+            format = 'inconnu';
+            console.warn('Erreur lors de l\'extraction du format:', e);
+        }
+        
+        img.setAttribute('data-format', format);
+        if (formatElement) formatElement.textContent = `${format}`;
+
+        // Poids (Content-Length via HEAD)
+        fetch(url, { method: 'HEAD' })
+            .then(response => {
+                const weight = response.headers.get('Content-Length');
+                if (weight) {
+                    img.setAttribute('data-weight', weight);
+                    if (weightElement) weightElement.textContent = `${Math.round(weight/1024)} Ko`;
+                } else {
+                    img.setAttribute('data-weight', '?');
+                    if (weightElement) weightElement.textContent = 'Poids : ?';
+                }
+            })
+            .catch(error => {
+                img.setAttribute('data-weight', '?');
+                if (weightElement) weightElement.textContent = 'Poids : ?';
+                console.warn('Impossible de récupérer le poids de l\'image (CORS ou autre) :', error);
+            });
+
+        // Taille (dimensions de l'image)
+        img.onload = function() {
+            if (details) {
+                details.setAttribute('data-width', img.naturalWidth);
+                details.setAttribute('data-height', img.naturalHeight);
+            }
+            if (sizeElement) sizeElement.textContent = `${img.naturalWidth}x${img.naturalHeight}`;
+        };
+        
+        // Gestion des erreurs
+        img.onerror = function() {
+            if (details) details.textContent = 'Erreur de chargement';
+            if (sizeElement) sizeElement.textContent = 'Erreur de chargement';
+        };
+        
+        container.appendChild(card);
     });
+
+    // Debug pédagogique : affiche le tableau d'images
+    console.log('Tableau des images reçues :', images);
 }
 
 /**
@@ -72,21 +137,7 @@ function togglePanel() {
     }
 }
 
-// insertPanelFromTemplate n'est plus nécessaire, la logique est intégrée ici.
-
-
-// Fonction utilitaire pour insérer le panneau à partir du template
-function insertPanelFromTemplate(template) {
-    // Clone le contenu du template (structure HTML du panneau)
-    const panel = template.content.cloneNode(true).children[0];
-    document.body.appendChild(panel);
-    void panel.offsetWidth;
-    panel.classList.add('visible');
-    // Affiche les images déjà reçues si elles existent
-    if (lastReceivedImages.length > 0) {
-        updateImages(lastReceivedImages);
-    }
-}
+// La logique d'insertion du panneau est intégrée directement dans togglePanel
 
 
 /**

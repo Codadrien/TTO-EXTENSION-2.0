@@ -63,5 +63,27 @@ observer.observe(document.body, {
 // Première collecte au chargement de la page
 sendImagesIfChanged();
 
+/**
+ * Fonction utilitaire pédagogique : affiche les dimensions réelles de toutes les images du DOM
+ * Affiche dans la console un objet {src, width, height} pour chaque <img> présent dans la page
+ * Utile pour le debug ou l'analyse rapide
+ */
+function logAllImageDimensions() {
+    const images = document.querySelectorAll('img');
+    // On construit un tableau d'objets {src, width, height}
+    const result = Array.from(images).map(img => ({
+        src: img.src,
+        width: img.naturalWidth,
+        height: img.naturalHeight
+    }));
+    // On affiche le tableau complet dans la console
+    console.log(result);
+}
+
+// Appel automatique après le chargement complet de la page pour garantir que les images sont bien chargées
+window.addEventListener('load', () => {
+    logAllImageDimensions();
+});
+
 
 // Ce fichier n'a qu'un seul rôle : collecter et transmettre les images. Rien de plus, rien de moins.
