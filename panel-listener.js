@@ -1,15 +1,13 @@
-// panel-listener.js
-// Ce script gère l'affichage du panneau latéral et des images
-
-// Variable pour stocker les dernières images reçues
 let lastReceivedImages = [];
 
 // Fonction pour afficher les images dans le panel
 function updateImages(images) {
-    const container = document.querySelector('#custom-side-panel .image-grid');
-    if (!container) return;
-
-    container.innerHTML = ''; // Vide le conteneur
+    const container = document.getElementById('imageContainer');
+    if (!container) {
+        console.error('Container imageContainer non trouvé!');
+        return;
+    }
+    container.innerHTML = '';
     images.forEach(url => {
         const img = document.createElement('img');
         img.src = url;
@@ -17,6 +15,7 @@ function updateImages(images) {
         container.appendChild(img);
     });
 }
+window.updateImages = updateImages;
 
 // Fonction pour afficher ou retirer le panneau
 function togglePanel() {
@@ -33,23 +32,27 @@ function togglePanel() {
         const panel = document.createElement('div');
         panel.id = 'custom-side-panel';
         panel.className = 'custom-side-panel';
-        
-        // Crée la structure du panel directement
         panel.innerHTML = `
-            <div class="image-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px;">
-            </div>
+            <div id="imageContainer" class="image-grid"></div>
         `;
-        
         document.body.appendChild(panel);
         void panel.offsetWidth;
         panel.classList.add('visible');
-        
-        // Affiche les images si on en a déjà
         if (lastReceivedImages.length > 0) {
             updateImages(lastReceivedImages);
         }
     }
 }
+
+// Fonction pour charger le fichier test-data.json
+async function loadTestData() {
+    const response = await fetch('test-data.json');
+    if (!response.ok) {
+        throw new Error('Erreur lors du chargement des données de test');
+    }
+    return await response.json();
+}
+window.loadTestData = loadTestData;
 
 // Écoute les messages du background
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -61,14 +64,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         lastReceivedImages = request.images;
         const panel = document.getElementById('custom-side-panel');
         if (panel) {
-            updateImages(request.images);
+            loadTestData().then(testImages => {
+                updateImages(testImages);
+                if (lastReceivedImages.length > 0) {
+                    updateImages(lastReceivedImages);
+                }
+            }).catch(error => {
+                console.error('Erreur lors du chargement des données de test:', error);
+            });
         }
     }
 });
-
-/*
-Explications pédagogiques :
-- Ce script ne fait rien tant qu'il ne reçoit pas le message 'toggle-panel'.
-- Quand il reçoit ce message, il affiche ou retire le panneau (toggle).
-- C'est la méthode recommandée pour un comportement réactif et performant dans une extension Chrome moderne.
-*/

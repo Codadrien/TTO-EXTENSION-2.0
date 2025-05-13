@@ -1,69 +1,24 @@
-<!-- panel.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Images de la page</title>
-  <link rel="stylesheet" href="panel.css">
-  <style>
-    .image-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 10px;
-    }
-    .image-grid img {
-      max-width: 200px;
-      width: 100%;
-      height: auto;
-      border-radius: 4px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="panel.css">
+    <title>Mon Panel</title>
 </head>
 <body>
-  <div class="image-grid" id="imageContainer">
-    <!-- Les images seront insérées ici dynamiquement -->
-  </div>
-
-  <script>
-    console.log('Panel HTML chargé');
-    
-    // Signale que le panel est prêt à recevoir des messages
-    window.parent.postMessage({ type: 'panel-ready' }, '*');
-    
-    // Écoute les messages via postMessage
-    window.addEventListener('message', (event) => {
-      // Vérifie l'origine du message
-      if (event.origin !== window.location.origin) {
-        console.warn('Message reçu d\'une origine non autorisée:', event.origin);
-        return;
-      }
-
-      console.log('Message reçu dans le panel via postMessage:', event.data);
-      
-      if (event.data && event.data.type === 'update-images') {
-        const container = document.getElementById('imageContainer');
-        console.log('Container trouvé:', container);
-        
-        if (!container) {
-          console.error('Container imageContainer non trouvé!');
-          return;
-        }
-        
-        container.innerHTML = ''; // Vide le conteneur
-
-        // Crée un élément img pour chaque URL
-        event.data.images.forEach(url => {
-          console.log('Ajout de l\'image:', url);
-          const img = document.createElement('img');
-          img.src = url;
-          img.alt = 'Image de la page';
-          container.appendChild(img);
+    <div id="custom-side-panel">
+        <div id="imageContainer" class="image-grid"></div> <!-- Conteneur pour les images -->
+    </div>
+    <script src="panel-listener.js"></script>
+    <script>
+        // Charger les données de test dès le chargement de la page
+        loadTestData().then(testImages => {
+            console.log('Images de test chargées:', testImages); // Affiche les images de test dans la console
+            updateImages(testImages); // Affiche les images de test
+        }).catch(error => {
+            console.error('Erreur lors du chargement des données de test:', error);
         });
-        
-        console.log('Toutes les images ont été ajoutées au panel');
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
