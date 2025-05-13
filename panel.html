@@ -7,8 +7,16 @@
     <title>Mon Panel</title>
 </head>
 <body>
-    <div id="custom-side-panel">
-        <div id="imageContainer" class="image-grid"></div> <!-- Conteneur pour les images -->
+    <script>
+      if (window.location.href.includes('panel.html')) {
+        document.body.classList.add('is-panel-html');
+      }
+    </script>
+    <div id="custom-side-panel" class="custom-side-panel">
+      <div id="header" class="header">
+        Extention TTO
+      </div>
+      <div id="imageContainer" class="image-grid"></div> <!-- Conteneur pour les images -->
     </div>
     <script src="panel-listener.js"></script>
     <script>

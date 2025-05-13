@@ -61,6 +61,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'toggle-panel') {
         togglePanel();
     } else if (request.type === 'update-images') {
+        // // On ignore la récupération d'image si on est sur panel.html (mode live server)
+        // if (window.location.href.includes('panel.html')) return;
         lastReceivedImages = request.images;
         const panel = document.getElementById('custom-side-panel');
         if (panel) {
@@ -75,3 +77,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
     }
 });
+
+
+// if (window.location.href.includes('panel.html')) {
+//     console.log("panel-listener.js : extension désactivée car panel.html détecté dans l'URL");
+//     // Désactive le CSS du panel si besoin :
+//     const css = document.querySelector('link[href*=\"panel.css\"]');
+//     if (css) css.disabled = true;
+//     document.querySelectorAll('style').forEach(style => {
+//         if (style.innerText.includes('.custom-side-panel')) style.disabled = true;
+//     });
+//     throw new Error("panel-listener.js désactivé (mode dev panel.html)");
+// }
