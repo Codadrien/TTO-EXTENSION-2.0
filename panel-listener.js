@@ -118,11 +118,16 @@ if (IS_PANEL_HTML) {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.type === 'toggle-panel') {
             togglePanel();
+            // Demande explicitement la liste d'images au background à l'ouverture du panneau
+            chrome.runtime.sendMessage({ type: 'request-images' });
         } else if (request.type === 'update-images') {
-            lastReceivedImages = request.images;
-            const panel = document.getElementById('custom-side-panel');
-            if (panel) {
-                updateImages(lastReceivedImages);
+            // Ne met à jour la liste que si elle a changé
+            if (JSON.stringify(request.images) !== JSON.stringify(lastReceivedImages)) {
+                lastReceivedImages = request.images;
+                const panel = document.getElementById('custom-side-panel');
+                if (panel) {
+                    updateImages(lastReceivedImages);
+                }
             }
         }
     }); // ← On ferme correctement la parenthèse ici
