@@ -31,13 +31,10 @@ function collectImages() {
 function sendImagesIfChanged() {
     const images = collectImages();
     if (JSON.stringify(images) !== JSON.stringify(lastSentImages)) {
+        // On n'attend pas de réponse, donc on ne met pas de callback (évite l'erreur de callback non géré)
         chrome.runtime.sendMessage({
             type: 'update-images',
             images
-        }, (response) => {
-            if (chrome.runtime.lastError) {
-                console.error('[image-collector] Erreur lors de l\'envoi:', chrome.runtime.lastError);
-            }
         });
         lastSentImages = images;
     }
