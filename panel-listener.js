@@ -52,7 +52,7 @@ function updateImages(images) {
         // Poids (Content-Length via HEAD)
         fetch(url, { method: 'HEAD' })
             .then(response => {
-                const weight = response.headers.get('Content-Length');
+                const weight = response.header-ttos.get('Content-Length');
                 if (weight) {
                     img.setAttribute('data-weight', weight);
                     if (weightElement) weightElement.textContent = `${Math.round(weight/1024)} Ko`;
